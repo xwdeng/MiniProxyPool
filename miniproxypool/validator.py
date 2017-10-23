@@ -29,46 +29,6 @@ class UrlObj:
         return "%s"%(self.proxy)
 
 UNREACHABLE = 100
-# todo: using aiohttp
-async def _get_respons_with_proxy_aiohttp(urlObj):
-    cur_speed = 0
-    try:
-        async with aiohttp.ClientSession() as session: #todo: proxy could be https? #urlObj.proxy #proxy="http://" + urlObj.proxy,
-            async with session.get(urlObj.url, headers = urlObj.headers, timeout = VALIDATOR_TIMEOUT) as response:
-                randWait = random.uniform(0, 2)
-                await asyncio.sleep(randWait)
-                start = time.time()
-                resp = await response.text()
-                if response.status == 200:
-                    cur_speed = time.time() - start
-                    logging.debug("[%s] succeeded: validating: %s, speed: %f" % (multiprocessing.current_process().name, urlObj.proxy, cur_speed))
-                else:
-                    logging.debug("failed: validating: %s, STATUS_CODE: %d" % (urlObj.proxy, response.status))
-                    cur_speed = UNREACHABLE
-
-    except Exception as e:
-        cur_speed = UNREACHABLE
-        logging.debug("failed: validating: %s, (%s)" % (urlObj.proxy, str(e)))
-
-    if cur_speed < UNREACHABLE:  # this 'weird' policy is used for clean the DB
-        urlObj.speed = cur_speed
-    else:
-        urlObj.speed += cur_speed
-    return urlObj
-
-# todo: using aiohttp
-def validate_proxy_list_aiohttp(urlObjs):
-    loop = asyncio.get_event_loop()
-    tasks = []
-    for taskURL in urlObjs:
-        tasks.append(asyncio.ensure_future(_get_respons_with_proxy_aiohttp(taskURL)))
-
-    loop.run_until_complete(asyncio.wait(tasks))
-    res = [];
-    for t in tasks:
-        res.append(t.result())
-    return res
-
 def validate_proxy_list_blocked(urlObjs):
     urlObjs_res = []
     for urlObj in urlObjs:

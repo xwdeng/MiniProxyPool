@@ -9,7 +9,7 @@ if __name__ == '__main__':
     miniproxypool.run_as_daemon()
 
     while(True):
-        time.sleep(60*30)
         logging.info("There are %d valid proxies in the pool."%len(miniproxypool.get_all_proxies()))
+        time.sleep(60 * 10)
     #print(miniproxypool.get_all_proxies())
 

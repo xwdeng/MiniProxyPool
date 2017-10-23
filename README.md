@@ -4,9 +4,9 @@ The Mini Proxy Pool is a package to help provide active proxy server resources.
 # Main Feature
 Here are just a few of the things that Mini Proxy Pool does well:
 
-- Free proxies to start with  
-  The main purpose of this project is to provide a simple way to maintain an active proxy pool with high quality proxy server resources. 
-  
+- Free proxies
+  The main purpose of this project is to provide a simple way to maintain an active proxy pool with high quality proxy server resources. By default, all the proxies are loaded from free websites.
+
 - Easy embedded in your own project  
   All the services in this package are running as daemon services. It is easy to setup the proxy into other projects.
 
@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
 ```
 
-## Using Mini Proxy Pool as a dedicate proxy pool server
+## Using Mini Proxy Pool as a dedicated proxy pool server
 ```python
 import miniproxypool
 import logging

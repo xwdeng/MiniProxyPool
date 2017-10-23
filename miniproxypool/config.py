@@ -19,7 +19,7 @@ INVALID_PROXY_TIMES = 5 # if a proxy cannot be connected for VALIDATOR_DEFINE_IN
 INVALID_PROXY_IF_DELETE = True
 
 VALIDATE_THREAD_RUN_PERIOD = 5 * 60 # seconds wait after each validation
-LOAD_FROM_SITES_THREAD_RUN_PERIOD = 3 * 60 # seconds wait after each loading from sites
+LOAD_FROM_SITES_THREAD_RUN_PERIOD = 30 * 60 # seconds wait after each loading from sites
 
 REST_SRV_IP = "0.0.0.0"
 REST_SRV_PORT = 9876

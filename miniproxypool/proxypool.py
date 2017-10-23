@@ -98,6 +98,9 @@ class ProxyPool():
         return (seq[i:i + n] for i in range(0, len(seq), n))
 
     def run_validators(self):
+        if self._thread_pool == None:
+            self._thread_pool = ThreadPool(VALIDATOR_THREAD_POOL_SIZE)
+
         logging.info("Staring to run validators for all the proxies in the DB...")
         proxyUrls = self._get_all_proxies()
         logging.info("Totally: " + str(len(proxyUrls)) + " proxy-entries.")
