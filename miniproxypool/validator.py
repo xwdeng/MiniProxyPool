@@ -14,7 +14,7 @@ import datetime
 import random
 import time
 import logging
-from .config import VALIDATOR_TIMEOUT
+import miniproxypool.config
 import requests
 import multiprocessing
 
@@ -38,7 +38,7 @@ def validate_proxy_list_blocked(urlObjs):
                 'https': 'https://' + urlObj.proxy,
             }
             start = time.time()
-            res = requests.get(urlObj.url, proxies = proxies,  timeout = VALIDATOR_TIMEOUT)
+            res = requests.get(urlObj.url, proxies = proxies,  timeout = miniproxypool.config.VALIDATOR_TIMEOUT)
             roundtrip = time.time() - start
             speed = 0;
             if res.status_code == 200:

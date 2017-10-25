@@ -65,7 +65,7 @@ class ProxyDB(SqliteDB):
 
     def get_valid_proxies(self):
         return self.select_threadsafe(self.table_name,
-                                      {'field': ['ip', 'port', 'speed'], 'where': [('speed', '<=', 1), ('speed', '>=', 0)], 'order': ['speed ASC'], 'limit': None})
+                                      {'field': ['ip', 'port', 'speed'], 'where': [('speed', '<=', 0.3), ('speed', '>=', 0)], 'order': ['speed ASC'], 'limit': None})
 
     def delete_invalided_proxies(self):
         return self.delete(self.table_name, {'where':[('speed', '>=', 500)]})

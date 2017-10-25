@@ -10,8 +10,7 @@
 
 from .proxydb import ProxyDB
 from .validator import *
-from .config import PROXY_SITES
-from .config import *
+import miniproxypool.config
 from .random_useragent import UserAgent
 from multiprocessing.pool import ThreadPool
 import logging
@@ -22,7 +21,7 @@ ua = UserAgent()
 class ProxyPool():
     def __init__(self):
         self.db = ProxyDB()
-        self.db.init_dbconn(PROXY_DB_FILE)
+        self.db.init_dbconn(miniproxypool.config.PROXY_DB_FILE)
         self.db.create_table_proxy() ##create
         self._thread_pool = None
         #self._process_pool = Pool(VALIDATOR_THREAD_POOL_SIZE)
@@ -30,40 +29,40 @@ class ProxyPool():
 
     def start_monitor_thread(self):
         if self._thread_pool == None:
-            self._thread_pool = ThreadPool(VALIDATOR_THREAD_POOL_SIZE)
+            self._thread_pool = ThreadPool(miniproxypool.config.VALIDATOR_THREAD_POOL_SIZE)
 
         while(True):
-            logging.info("CONFIG: Validators runs in every %d minutes"% int(VALIDATE_THREAD_RUN_PERIOD/60))
-            if INVALID_PROXY_IF_DELETE:
-                logging.info("CONFIG: Invalid proxies will be cleared from DB.")
+            logging.warning("CONFIG: Validators runs in every %d minutes. VALIDATING URL: %s" % ( int(miniproxypool.config.VALIDATE_THREAD_RUN_PERIOD/60), miniproxypool.config.VALIDATOR_URL))
+            if miniproxypool.config.INVALID_PROXY_IF_DELETE:
+                logging.warning("CONFIG: Invalid proxies will be cleared from DB.")
             self.run_validators()
-            if INVALID_PROXY_IF_DELETE:
+            if miniproxypool.config.INVALID_PROXY_IF_DELETE:
                 self.clear_invalid_proxies()
-            time.sleep(VALIDATE_THREAD_RUN_PERIOD)
+            time.sleep(miniproxypool.config.VALIDATE_THREAD_RUN_PERIOD)
 
     def start_load_from_sites_thread(self):
-        logging.info("CONFIG: Reading proxy-list from sites in every %d minutes" % int(LOAD_FROM_SITES_THREAD_RUN_PERIOD/60))
+        logging.warning("CONFIG: Reading proxy-list from sites in every %d minutes" % int(miniproxypool.config.LOAD_FROM_SITES_THREAD_RUN_PERIOD/60))
         while(True):
             self._fetch_proxies_from_sites()
-            time.sleep(LOAD_FROM_SITES_THREAD_RUN_PERIOD)
+            time.sleep(miniproxypool.config.LOAD_FROM_SITES_THREAD_RUN_PERIOD)
 
     def start_rest_api_thread(self):
         pass
 
     def _fetch_proxies_from_sites(self):
         """
-        Load all the proxy entries from Sites configured in config.py to Dababase.
+        Load all the proxy entries from Sites configured in miniproxypool.config.py to Dababase.
         Only new entry (ip:port) would be imported.
         """
-        logging.info("Loading proxy-entries from configured web-sites...")
-        sites = PROXY_SITES
+        logging.warning("Loading proxy-entries from configured web-sites...")
+        sites = miniproxypool.config.PROXY_SITES
         for site in sites:
             url_base = site['url_base']
             pattern = re.compile(site['pattern'])
             ip_ind = site['ip_ind']
             port_ind = site['port_ind']
 
-            header = DEFAULT_HEADERS
+            header = miniproxypool.config.DEFAULT_HEADERS
             header['User-agent'] = ua.random()
             try:
                 r = requests.get(url_base, headers = header, timeout = 5)
@@ -78,7 +77,7 @@ class ProxyPool():
                 logging.info("  Site [%s]: %d new proxies are added to DB."% (url_base, cnt_newproxy))
             except Exception as e:
                 logging.info(e)
-        logging.info("Loading all done.")
+        logging.warning("Loading all done. There're %d proxies in the DB."%len(self._get_all_proxies()))
 
 
 
@@ -99,18 +98,18 @@ class ProxyPool():
 
     def run_validators(self):
         if self._thread_pool == None:
-            self._thread_pool = ThreadPool(VALIDATOR_THREAD_POOL_SIZE)
+            self._thread_pool = ThreadPool(miniproxypool.config.VALIDATOR_THREAD_POOL_SIZE)
 
-        logging.info("Staring to run validators for all the proxies in the DB...")
+        logging.warning("Staring to run validators for all the proxies in the DB...")
         proxyUrls = self._get_all_proxies()
         logging.info("Totally: " + str(len(proxyUrls)) + " proxy-entries.")
         urlObjs = []
         for url in proxyUrls:
-            headers = DEFAULT_HEADERS
+            headers = miniproxypool.config.DEFAULT_HEADERS
             headers['User-agent'] = ua.random()
-            urlObjs.append(UrlObj(VALIDATOR_URL, headers, "%s:%s" % (url[0], url[1]), url[2])) #"http://103.238.68.184:8888" ) ) #"
+            urlObjs.append(UrlObj(miniproxypool.config.VALIDATOR_URL, headers, "%s:%s" % (url[0], url[1]), url[2])) #"http://103.238.68.184:8888" ) ) #"
 
-        split_urlObjs = self._chunks(urlObjs, VALIDATOR_CONNECTIONS_PER_THREAD)
+        split_urlObjs = self._chunks(urlObjs, miniproxypool.config.VALIDATOR_CONNECTIONS_PER_THREAD)
 
 
         urlObjs_groups = []
@@ -122,7 +121,7 @@ class ProxyPool():
         ress = self._thread_pool.map(validate_proxy_list_blocked, urlObjs_groups)
         self._save_all_validator_results(ress)
 
-        logging.info("Validators Done!!")
+        logging.warning("Validators Done!!")
 
     def _save_all_validator_results(self, ress):
         logging.info("Saving results into DB..")

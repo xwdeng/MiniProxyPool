@@ -14,8 +14,7 @@ import threading
 import re
 import logging
 import json
-from .config import REST_SRV_IP
-from .config import REST_SRV_PORT
+import miniproxypool.config
 
 proxypool_inst = None
 
@@ -74,7 +73,7 @@ class SimpleHttpServer():
 def start_rest_api_thread(proxypool):
     global proxypool_inst
     proxypool_inst = proxypool
-    server = SimpleHttpServer(REST_SRV_IP, REST_SRV_PORT)
-    logging.info('Restful API Server running at port [%s:%d] ...'%(REST_SRV_IP, REST_SRV_PORT))
+    server = SimpleHttpServer(miniproxypool.config.REST_SRV_IP, miniproxypool.config.REST_SRV_PORT)
+    logging.info('Restful API Server running at port [%s:%d] ...'%(miniproxypool.config.REST_SRV_IP, miniproxypool.config.REST_SRV_PORT))
     server.start()
     server.waitForThread()

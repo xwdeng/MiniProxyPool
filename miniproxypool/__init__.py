@@ -24,12 +24,12 @@ def run_as_daemon():
     if (proxypool_inst == None):
         proxypool_inst = ProxyPool()
 
-    logging.info("Mini Proxy Pool is running now...")
+    logging.warning("Mini Proxy Pool is running now...")
     if len(proxypool_inst._get_all_proxies()) == 0:
-        logging.info("First time running is detected. Please wait database to be initialized...")
+        logging.warning("First time running is detected. Please wait database to be initialized...")
         proxypool_inst._fetch_proxies_from_sites()
         proxypool_inst.run_validators()
-    logging.info("Database initializaion done.")
+    logging.warning("Database initializaion done.")
 
     global t1, t2
     t1 = threading.Thread(target=proxypool_inst.start_monitor_thread)
