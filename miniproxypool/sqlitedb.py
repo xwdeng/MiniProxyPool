@@ -11,6 +11,8 @@
 # This module provide the basic interface for accessing SqliteDB
 import sqlite3
 import threading
+
+
 class SqliteDB(object):
     def __init__(self):
         self.lock = threading.Lock() #right now, only SELECT action is designed for multi-threading.

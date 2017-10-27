@@ -18,42 +18,60 @@ import miniproxypool.config
 import requests
 import multiprocessing
 
+
 class UrlObj:
+    """
+    Corresponding to proxyDB record.
+        ip, port, speed
+    """
     def __init__(self, url, headers, proxy, speed):
+        """
+        Specify that the @url needs @speed time to reach miniproxypool.config.VALIDATOR_URL (requests header is @headers)
+        :param url:  full url.  e.g. http://www.google.ca
+        :param headers: dict.   e.g. {'User-Agent': 'Chrome....', ...}
+        :param proxy: str.      e.g. "ip:port"
+        :param speed: float.    e.g. 1.1
+        """
         self.url = url
         self.headers = headers
         self.proxy = proxy
         self.speed = speed
 
     def __str__(self):
-        return "%s"%(self.proxy)
+        return "%s" % (self.proxy)
+
 
 UNREACHABLE = 100
-def validate_proxy_list_blocked(urlObjs):
-    urlObjs_res = []
-    for urlObj in urlObjs:
+
+
+def validate_proxy_list_blocked(url_objs):
+    """
+    Validate and update speed in each urlObj and return the updated urlObjs list.
+    """
+    url_objs_res = []
+    for urb_obj in url_objs:
         try:
             proxies = {
-                'http': 'http://' + urlObj.proxy,
-                'https': 'https://' + urlObj.proxy,
+                'http': 'http://' + urb_obj.proxy,
+                'https': 'https://' + urb_obj.proxy,
             }
             start = time.time()
-            res = requests.get(urlObj.url, proxies = proxies,  timeout = miniproxypool.config.VALIDATOR_TIMEOUT)
+            res = requests.get(urb_obj.url, proxies=proxies,  timeout=miniproxypool.config.VALIDATOR_TIMEOUT)
             roundtrip = time.time() - start
             speed = 0;
             if res.status_code == 200:
                 speed = roundtrip
-                logging.warning("succeeded: validating:%25s. speed: %f" % (urlObj.proxy, roundtrip))
+                logging.debug("succeeded: validating [%25s] speed: %f" % (urb_obj.proxy, roundtrip))
             else:
                 speed = UNREACHABLE
-                logging.debug("failed: validating:%25s. status code: %f" % (urlObj.proxy, res.status_code))
+                logging.debug("failed: validating [%25s] status code: %f" % (urb_obj.proxy, res.status_code))
         except Exception as e:
             speed = UNREACHABLE
-            logging.debug("failed: validating: %s. (%s)" % (urlObj.proxy, str(e)))
+            logging.debug("failed: validating: [%25s] (%s)" % (urb_obj.proxy, type(e)))
         finally:
             if speed < UNREACHABLE:
-                urlObj.speed = speed
+                urb_obj.speed = speed
             else:
-                urlObj.speed += speed
-            urlObjs_res.append(urlObj)
-    return urlObjs_res
+                urb_obj.speed += speed
+            url_objs_res.append(urb_obj)
+    return url_objs_res
