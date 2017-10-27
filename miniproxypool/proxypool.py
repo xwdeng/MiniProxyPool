@@ -100,9 +100,9 @@ class ProxyPool():
         if self._thread_pool == None:
             self._thread_pool = ThreadPool(miniproxypool.config.VALIDATOR_THREAD_POOL_SIZE)
 
-        logging.warning("Staring to run validators for all the proxies in the DB...")
         proxyUrls = self._get_all_proxies()
-        logging.info("Totally: " + str(len(proxyUrls)) + " proxy-entries.")
+        logging.warning("Validators starts... (%d proxies in the DB)..."%len(proxyUrls))
+
         urlObjs = []
         for url in proxyUrls:
             headers = miniproxypool.config.DEFAULT_HEADERS
@@ -121,11 +121,11 @@ class ProxyPool():
         ress = self._thread_pool.map(validate_proxy_list_blocked, urlObjs_groups)
         self._save_all_validator_results(ress)
 
-        logging.warning("Validators Done!!")
+        logging.warning("Validators Done!! (%d VALID proxies in the DB)"%len(self.get_valid_proxies()))
 
     def _save_all_validator_results(self, ress):
-        logging.info("Saving results into DB..")
-        tmp = []
+        logging.info("Saving results into DB....")
+        proxies = []
         for res in ress:
             for valUrlRes in res:
                 if isinstance(valUrlRes, UrlObj):
@@ -136,9 +136,9 @@ class ProxyPool():
                         'protocol': "http",
                         'speed': valUrlRes.speed
                     }
-                    tmp.append(proxy_entry)
-        self.db.update_proxies(tmp)
-        logging.info("   %d proxies are updated." % len(tmp))
+                    proxies.append(proxy_entry)
+        errs = self.db.update_proxies(proxies)
+        logging.info("   %d proxies are updated." % len(proxies))
     
     def clear_invalid_proxies(self):
         self.db.delete_invalided_proxies()

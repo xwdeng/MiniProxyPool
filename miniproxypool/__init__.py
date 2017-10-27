@@ -12,7 +12,7 @@
 from .random_useragent import UserAgent
 from .proxypool import ProxyPool
 from .restapi import start_rest_api_thread
-
+import miniproxypool.config
 import threading
 import logging
 proxypool_inst = None
@@ -55,3 +55,7 @@ def get_all_proxies():
     if (proxypool_inst == None):
         proxypool_inst = ProxyPool()
     return proxypool_inst.get_valid_proxies()
+
+def rest_api_url_get_all_valid_proxiex():
+    return "http://" + "localhost:" + miniproxypool.config.REST_SRV_PORT + miniproxypool.config.REST_API_PATH_GET_ALL_VALID
+

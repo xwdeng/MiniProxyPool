@@ -104,6 +104,6 @@ ENV/
 .idea
 
 # db
-*.db
+*.db*
 
 .DS_Store

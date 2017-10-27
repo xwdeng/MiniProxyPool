@@ -28,7 +28,7 @@ def proxy_entry_to_dict(proxy_entry):
 
 class HTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        if None != re.search('/api/v1/proxies/*', self.path):
+        if re.search(miniproxypool.config.REST_API_PATH_GET_ALL_VALID, self.path) is not None:
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
             self.end_headers()

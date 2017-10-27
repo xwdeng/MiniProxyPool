@@ -13,46 +13,54 @@ import sqlite3
 import threading
 class SqliteDB(object):
     def __init__(self):
-        self.lock = threading.Lock()
-        self.queries = {
-            #'SELECT': 'SELECT %s FROM %s',
-            #'INSERT': 'INSERT INTO %s (%s) VALUES(%s)',
-            #'UPDATE': 'UPDATE %s SET %s WHERE %s',
-            #'DELETE': 'DELETE FROM %s where %s',
-            'DELETE_ALL': 'DELETE FROM %s',
-            'CREATE_TABLE': 'CREATE TABLE IF NOT EXISTS %s(%s)',
-        }
+        self.lock = threading.Lock() #right now, only SELECT action is designed for multi-threading.
 
     def init_dbconn(self, db_file):
-        self.db = sqlite3.connect(db_file, check_same_thread=False)
+        """
+        create database and also make the connection
+        :param db_file:
+        :return:
+        """
         self.db_file = db_file
+        self.db = sqlite3.connect(self.db_file, check_same_thread=False)
         self.cursor = self.db.cursor()
 
     def create_table(self, table_name):
+        """
+        please override this function.
+        :param table_name:
+        :return:
+        """
         pass
 
     def free(self):
         self.cursor.close()
 
-    def select_threadsafe(self, table_name, args):
+    def select_threadsafe(self, table_name, conds):
         """
         SQL syntax: SELECT col1, col2, ... FROM table_name WHERE col1 > num1, ...
 
         :param table_name:
-        :param args:
+        :param conds: dictionary with all the needed parameter for SQL query.
+            example:
+            {
+              'where' : [ ('col1', '>', 100), ('col2', '>', 200), ...],
+              'order' : [ 'col1 ASC','col2 DESC' ...],
+              'limit' : 20
+             }
         :return:
         """
         vals = []
-        query = "SELECT %s" % (','.join(args['field']))
+        query = "SELECT %s" % (','.join(conds['field']))
         query += " FROM %s" % table_name
-        if args['where']:
-            query += ' WHERE ' + ' and '.join(['%s %s ?' % n[:2] for n in args['where']])
-            vals.extend([n[-1] for n in args['where']])
-        if args['order']:
-            query += ' ORDER BY ' + ','.join(args['order'])
-        if args['limit']:
+        if conds['where']:
+            query += ' WHERE ' + ' and '.join(['%s %s ?' % n[:2] for n in conds['where']])
+            vals.extend([n[-1] for n in conds['where']])
+        if conds['order']:
+            query += ' ORDER BY ' + ','.join(conds['order'])
+        if conds['limit']:
             query += ' LIMIT ?'
-            vals.append(args['limit'])
+            vals.append(conds['limit'])
 
         self.lock.acquire()
         try:
@@ -64,19 +72,29 @@ class SqliteDB(object):
 
     def insert(self, table_name, args):
         """
+        Insert multi rows into DB.
+
         SQL syntax: INSERT INTO table_name (col1,col2,...) VALUES(val1, val2,..)
 
         :param table_name:
-        :param args:
+        :param datas:
+        example:
+            [
+              {
+                    'data': {'col1':val1, 'col2':val2, ...}
+              },
+              ...
+            ]
         :return:
         """
         result = []
         for arg in args:
-            cols = ','.join([k for k in arg])
-            values = ','.join(['?' for l in arg])
-            vals = tuple([arg[k] for k in arg])
+            data = arg['data']
+            cols = ','.join([k for k in data])
+            qmarks = ','.join(['?' for l in data])
+            vals = tuple([data[k] for k in data])
             query = "INSERT INTO %s" % table_name
-            query += " (%s) VALUES(%s)"% (cols, values)
+            query += " (%s) VALUES(%s)"% (cols, qmarks)
             try:
                 self.cursor.execute(query, vals)
                 result.append('success')
@@ -89,34 +107,51 @@ class SqliteDB(object):
 
     def update(self, table_name, args):
         """
-        SQL syntax: UPDATE table_name SET col1 = val1, ... WHERE conds
-
         :param table_name:
         :param args:
+            [
+                {
+                     'data': {'col1':val1, 'col2':val2, ...},
+                    'where': [ ('col1', '>', 100), ('col2', '<', 200), ...],
+                },
+                ...
+            ]
         :return:
         """
         result = []
         for arg in args:
-            updates = ','.join(['%s=?' % k for k in arg])
-            conds = ' and '.join(['%s=?' % k for k in arg if k == 'ip' or k == 'port'])
-            vals = [arg[k] for k in arg]
-            subs = [arg[k] for k in arg if k == 'ip' or k == 'port']
+            vals = []
+            data = arg['data']
+            updates = ','.join(['%s=?' % k for k in data])
+            vals.extend([data[k] for k in data])
+            conds = ' and '.join([ "%s %s ?" % (k[0], k[1]) for k in arg['where']])
+            vals.extend(["%s"%k[2] for k in arg['where']])
             query = "UPDATE %s" % table_name
             query += " SET %s WHERE %s" % (updates, conds)
             try:
-                self.cursor.execute(query, vals + subs)
+                self.cursor.execute(query, vals)
                 result.append('success')
             except Exception as e:
                 result.append(e)
         self.db.commit()
         return result
 
-    def delete(self, table_name, condition):
+    def delete(self, table_name, cond_where):
+        """
+
+        :param table_name:
+        :param cond_where: dictionary with all the needed parameter for SQL query.
+            example:
+            {
+              'where' : [ ('col1', '>', 100), ('col2', '>', 200), ...],
+             }
+        :return:
+        """
         vals = []
         query = 'DELETE FROM %s' % table_name
-        if condition['where']:
-            query += ' WHERE ' + ' and '.join(['%s %s ?' % n[:2] for n in condition['where']])
-            vals.extend([n[-1] for n in condition['where']])
+        if cond_where['where']:
+            query += ' WHERE ' + ' and '.join(['%s %s ?' % n[:2] for n in cond_where['where']])
+            vals.extend([n[-1] for n in cond_where['where']])
 
         result = self.cursor.execute(query, vals).fetchall()
         self.db.commit()

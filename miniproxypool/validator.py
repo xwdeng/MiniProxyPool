@@ -43,10 +43,10 @@ def validate_proxy_list_blocked(urlObjs):
             speed = 0;
             if res.status_code == 200:
                 speed = roundtrip
-                logging.debug("succeeded: validating: %s. speed: %f" % (urlObj.proxy, roundtrip))
+                logging.warning("succeeded: validating:%25s. speed: %f" % (urlObj.proxy, roundtrip))
             else:
                 speed = UNREACHABLE
-                logging.debug("failed: validating: %s. status code: %f" % (urlObj.proxy, res.status_code))
+                logging.debug("failed: validating:%25s. status code: %f" % (urlObj.proxy, res.status_code))
         except Exception as e:
             speed = UNREACHABLE
             logging.debug("failed: validating: %s. (%s)" % (urlObj.proxy, str(e)))

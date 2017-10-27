@@ -10,6 +10,7 @@
 
 from .sqlitedb import SqliteDB
 import logging
+import miniproxypool.config
 import threading
 
 class ProxyDB(SqliteDB):
@@ -27,7 +28,7 @@ class ProxyDB(SqliteDB):
                    created_time TimeStamp NOT NULL DEFAULT '0000-00-00 00:00:00',
                    PRIMARY KEY (ip,port)
                '''
-        query = self.queries['CREATE_TABLE'] % (self.table_name, values)
+        query = "CREATE TABLE IF NOT EXISTS %s(%s)" % (self.table_name, values)
         self.cursor.execute(query)
         query = '''
                    CREATE INDEX IF NOT EXISTS proxy_index on %s (protocol, speed, updated_time, created_time);
@@ -45,12 +46,14 @@ class ProxyDB(SqliteDB):
 
     # add one proxy entry in the table
     def add_new_proxy(self, ip, port, protocol, speed):
-        args = [{
-            'ip':ip,
-            'port':port,
-            'protocol': protocol,
-            'speed': speed
-        }]
+        args = [ {
+                'data': {
+                    'ip':ip,
+                    'port':port,
+                    'protocol': protocol,
+                    'speed': speed
+                        }
+                } ]
         errs = self.insert(self.table_name, args)
         if errs[0] == 'success':
             logging.debug("new proxy added: %s:%s"%(ip, port))
@@ -65,24 +68,39 @@ class ProxyDB(SqliteDB):
 
     def get_valid_proxies(self):
         return self.select_threadsafe(self.table_name,
-                                      {'field': ['ip', 'port', 'speed'], 'where': [('speed', '<=', 0.3), ('speed', '>=', 0)], 'order': ['speed ASC'], 'limit': None})
+                                      {'field': ['ip', 'port', 'speed'], 'where': [('speed', '<=', miniproxypool.config.VALIDATOR_TIMEOUT), ('speed', '>=', 0)], 'order': ['speed ASC'], 'limit': None})
 
     def delete_invalided_proxies(self):
         return self.delete(self.table_name, {'where':[('speed', '>=', 500)]})
 
     def update_proxies(self, proxies):
-        errs = self.update(self.table_name, proxies)
-        if not errs:
-            logging.debug("updated %d proxy entries." % (len(proxies)))
+        """
+        :param proxies:
+            example:
+               [
+                 {'ip': 123.123.123.123,
+                  'port': 123,
+                  'protocol': "http",
+                  'speed': 1.2,
+                  },
+                  ...
+               ]
+        :return: 
+        """
+        args = []
+        args.extend([ {'data': proxy, 'where':[('ip', '=', proxy['ip']),('port', '=', proxy['port'])]}  for proxy in proxies])
+        errs = self.update(self.table_name, args)
+        logging.debug("updated %d proxy entries." % (len(proxies)))
+        return errs
+
 
     def update_proxy(self, ip, port, protocol, speed):
-        args = [{
+        #todo: change
+        proxies = [{
             'ip': ip,
             'port': port,
             'protocol': protocol,
             'speed': speed
         }]
-        errs = self.update(self.table_name, args)
-        if not errs:
-            logging.info("updated proxy entry: %s:%s \t\tspeed:%f" % (ip, port, speed))
+        self.update_proxies(proxies)
 
