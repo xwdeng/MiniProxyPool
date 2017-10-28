@@ -8,8 +8,6 @@
 # This program is free software and it is distributed under
 # the terms of the MIT license. Please see LICENSE file for details.
 
-import asyncio
-import aiohttp
 import datetime
 import random
 import time
@@ -17,6 +15,9 @@ import logging
 import miniproxypool.config
 import requests
 import multiprocessing
+
+logger = logging.getLogger(__name__)
+UNREACHABLE = 100
 
 
 class UrlObj:
@@ -41,12 +42,10 @@ class UrlObj:
         return "%s" % (self.proxy)
 
 
-UNREACHABLE = 100
-
-
 def validate_proxy_list_blocked(url_objs):
     """
     Validate and update speed in each urlObj and return the updated urlObjs list.
+    Note: this function validate the urlObjs by using requests.get() which is a blocked function.
     """
     url_objs_res = []
     for urb_obj in url_objs:
@@ -61,13 +60,13 @@ def validate_proxy_list_blocked(url_objs):
             speed = 0;
             if res.status_code == 200:
                 speed = roundtrip
-                logging.debug("succeeded: validating [%25s] speed: %f" % (urb_obj.proxy, roundtrip))
+                logger.debug("[%s]succeeded: validating [%25s] speed: %f" % (__name__, urb_obj.proxy, roundtrip))
             else:
                 speed = UNREACHABLE
-                logging.debug("failed: validating [%25s] status code: %f" % (urb_obj.proxy, res.status_code))
+                logger.debug("failed: validating [%25s] status code: %f" % (urb_obj.proxy, res.status_code))
         except Exception as e:
             speed = UNREACHABLE
-            logging.debug("failed: validating: [%25s] (%s)" % (urb_obj.proxy, type(e)))
+            logger.debug("failed: validating: [%25s] (%s)" % (urb_obj.proxy, type(e)))
         finally:
             if speed < UNREACHABLE:
                 urb_obj.speed = speed

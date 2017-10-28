@@ -2,7 +2,8 @@ import miniproxypool
 import logging
 import sys
 import time
-logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='[%(asctime)s] [%(levelname)s] [%(threadName)10s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S',)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='[%(name)20.20s] [%(asctime)s] [%(levelname)7.7s] [%(threadName)10s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S',)
+import requests
 
 if __name__ == '__main__':
     miniproxypool.config.REST_SRV_IP = "0.0.0.0"
@@ -11,8 +12,9 @@ if __name__ == '__main__':
     miniproxypool.run_as_daemon()
     miniproxypool.run_rest_api_serv()
 
-    logging.info("Proxy pool is running and can be fetched at:http://%s:%d/api/v1/proxies" % (miniproxypool.config.REST_SRV_IP, miniproxypool.config.REST_SRV_PORT))
-
     while(True):
-        # Because all the services is running as daemon threads, main threads should always be running...
-        time.sleep(60*30)
+        time.sleep(5)
+        # test and print the valid proxies from restapi
+        r = requests.get(miniproxypool.rest_api_url_get_all_valid_proxiex())
+        print(r.text)
+

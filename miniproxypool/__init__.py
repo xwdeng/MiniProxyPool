@@ -19,17 +19,20 @@ proxypool_inst = None
 t1 = None;
 t2 = None;
 t3 = None;
+
+logger = logging.getLogger(__name__)
+
+
 def run_as_daemon():
     global proxypool_inst
     if (proxypool_inst == None):
         proxypool_inst = ProxyPool()
 
-    logging.warning("Mini Proxy Pool is running now...")
     if len(proxypool_inst._get_all_proxies()) == 0:
-        logging.warning("First time running is detected. Please wait database to be initialized...")
+        logger.warning("First time running is detected. Please wait database to be initialized...")
         proxypool_inst._fetch_proxies_from_sites()
         proxypool_inst.run_validators()
-    logging.warning("Database initializaion done.")
+        logger.warning("First time running done.")
 
     global t1, t2
     t1 = threading.Thread(target=proxypool_inst.start_monitor_thread)
@@ -39,6 +42,7 @@ def run_as_daemon():
 
     t1.start()
     t2.start()
+
 
 def run_rest_api_serv():
     global proxypool_inst
@@ -56,6 +60,7 @@ def get_all_proxies():
         proxypool_inst = ProxyPool()
     return proxypool_inst.get_valid_proxies()
 
+
 def rest_api_url_get_all_valid_proxiex():
-    return "http://" + "localhost:" + miniproxypool.config.REST_SRV_PORT + miniproxypool.config.REST_API_PATH_GET_ALL_VALID
+    return "http://" + "localhost:%d/%s" % (miniproxypool.config.REST_SRV_PORT, miniproxypool.config.REST_API_PATH_GET_ALL_VALID)
 

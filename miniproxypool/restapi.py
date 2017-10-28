@@ -16,6 +16,7 @@ import logging
 import json
 import miniproxypool.config
 
+logger = logging.getLogger(__name__)
 proxypool_inst = None
 
 def proxy_entry_to_dict(proxy_entry):
@@ -74,6 +75,8 @@ def start_rest_api_thread(proxypool):
     global proxypool_inst
     proxypool_inst = proxypool
     server = SimpleHttpServer(miniproxypool.config.REST_SRV_IP, miniproxypool.config.REST_SRV_PORT)
-    logging.info('Restful API Server running at port [%s:%d] ...'%(miniproxypool.config.REST_SRV_IP, miniproxypool.config.REST_SRV_PORT))
+    logger.warning('Restful API Server running at [%s:%d] ...'%(miniproxypool.config.REST_SRV_IP, miniproxypool.config.REST_SRV_PORT))
+    logging.warning("Restapi to get all valid proxies: GET http://%s:%d/api/v1/proxies" % ("localhost", miniproxypool.config.REST_SRV_PORT))
+
     server.start()
     server.waitForThread()

@@ -11,6 +11,9 @@
 # This module provide the basic interface for accessing SqliteDB
 import sqlite3
 import threading
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class SqliteDB(object):
@@ -70,7 +73,6 @@ class SqliteDB(object):
         finally:
             self.lock.release()
             return data
-
 
     def insert(self, table_name, args):
         """

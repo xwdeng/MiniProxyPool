@@ -2,7 +2,11 @@ import miniproxypool
 import logging
 import sys
 import time
-logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='[%(asctime)s] [%(levelname)s] [%(threadName)10s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S',)
+import requests
+logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='[%(name)20.20s] [%(asctime)s] [%(levelname)7.7s] [%(threadName)10s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S',)
+logging.getLogger('requests').setLevel(logging.WARNING) # suppress the logger from requests
+
+logger = logging.getLogger(__name__)
 
 if __name__ == '__main__':
     miniproxypool.config.VALIDATOR_URL = "http://www.google.ca"
@@ -14,7 +18,7 @@ if __name__ == '__main__':
     miniproxypool.run_as_daemon()
 
     while(True):
-        logging.info("There are %d valid proxies in the pool."%len(miniproxypool.get_all_proxies()))
+        print("There are %d valid proxies in the pool."%len(miniproxypool.get_all_proxies()))
         time.sleep(60 * 10)
     #print(miniproxypool.get_all_proxies())
 

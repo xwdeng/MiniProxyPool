@@ -13,6 +13,9 @@ import logging
 import miniproxypool.config
 import threading
 
+logger = logging.getLogger(__name__)
+
+
 class ProxyDB(SqliteDB):
     def __init__(self):
         super().__init__()
@@ -42,21 +45,22 @@ class ProxyDB(SqliteDB):
                        END;
                '''%( self.table_name, self.table_name, self.table_name, self.table_name, self.table_name)
         self.cursor.executescript(query)
+        logger.debug("Created table %s." % self.table_name)
 
 
     # add one proxy entry in the table
     def add_new_proxy(self, ip, port, protocol, speed):
-        args = [ {
+        args = [{
                 'data': {
                     'ip':ip,
                     'port':port,
                     'protocol': protocol,
                     'speed': speed
                         }
-                } ]
+                }]
         errs = self.insert(self.table_name, args)
         if errs[0] == 'success':
-            logging.debug("new proxy added: %s:%s"%(ip, port))
+            logger.debug("Added one proxy: %s:%s"%(ip, port))
             return True
         else:
             return False
@@ -70,7 +74,8 @@ class ProxyDB(SqliteDB):
         return self.select_threadsafe(self.table_name,
                                       {'field': ['ip', 'port', 'speed'], 'where': [('speed', '<=', miniproxypool.config.VALIDATOR_TIMEOUT), ('speed', '>=', 0)], 'order': ['speed ASC'], 'limit': None})
 
-    def delete_invalided_proxies(self):
+    def delete_invalid_proxies(self):
+        logger.info("Deleted all invalid proxies.")
         return self.delete(self.table_name, {'where':[('speed', '>=', 500)]})
 
     def update_proxies(self, proxies):
@@ -90,7 +95,7 @@ class ProxyDB(SqliteDB):
         args = []
         args.extend([ {'data': proxy, 'where':[('ip', '=', proxy['ip']),('port', '=', proxy['port'])]}  for proxy in proxies])
         errs = self.update(self.table_name, args)
-        logging.debug("updated %d proxy entries." % (len(proxies)))
+        logger.debug("Updated %d proxy entries." % (len(proxies)))
         return errs
 
 
