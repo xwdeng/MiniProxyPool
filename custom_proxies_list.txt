@@ -1,0 +1,3 @@
+# Add proxy list here
+# e.g.
+# 110.110.110.110:1234

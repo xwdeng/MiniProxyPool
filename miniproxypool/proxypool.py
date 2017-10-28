@@ -15,6 +15,7 @@ from .random_useragent import UserAgent
 from multiprocessing.pool import ThreadPool
 import logging
 import re
+import os.path
 
 logger = logging.getLogger(__name__)
 ua = UserAgent()
@@ -46,18 +47,51 @@ class ProxyPool():
                 self.clear_invalid_proxies()
             time.sleep(miniproxypool.config.VALIDATE_THREAD_RUN_PERIOD)
 
-    def start_load_from_sites_thread(self):
-        logger.info("CONFIG: Reading proxy-list from sites in every %d minutes" % int(miniproxypool.config.LOAD_FROM_SITES_THREAD_RUN_PERIOD/60))
+    def start_load_proxies_from_resources_thread(self):
+        logger.info("CONFIG: Reading proxy-list from sites in every %d minutes" % int(miniproxypool.config.LOAD_PORXIES_FROM_RESOURCES_THREAD_RUN_PERIOD / 60))
         while(True):
             self._fetch_proxies_from_sites()
-            time.sleep(miniproxypool.config.LOAD_FROM_SITES_THREAD_RUN_PERIOD)
+            self._fetch_proxies_from_localfile()
+            time.sleep(miniproxypool.config.LOAD_PORXIES_FROM_RESOURCES_THREAD_RUN_PERIOD)
+
+    def _fetch_proxies_from_localfile(self):
+        try:
+            logger.info("Loading proxy-entries from local files...")
+            ## Open the file with read only permit
+            files = miniproxypool.config.PROXY_FILES
+            for fpath in files:
+                if not os.path.exists(fpath):
+                    logger.warning("Custom proxy file '%s' does not found." % fpath)
+                    continue
+                with open(fpath) as f:
+                    content = f.readlines()
+                    content = [x.strip() for x in content]
+                    cnt_newproxy = 0
+                    for line in content:
+                        if line:
+                            if line[0] == '#':
+                                continue
+                            else:
+                                #write the record to DB
+                                ip_port = line.split(':')
+                                res = self.db.add_new_proxy(ip_port[0], ip_port[1], 'http', -1)  # speed = -1, means not tested yet
+                                if res:
+                                    cnt_newproxy += 1
+                    logger.info("  File [%s]: %d new proxies are added to DB." % (fpath, cnt_newproxy))
+
+        except Exception as e:
+            logger.warning("Error(%s) happens when reading proxies from file.", type(e))
+        finally:
+            logger.info("Loading files done. There're %d proxies in the DB." % len(self._get_all_proxies()))
+
+
 
     def _fetch_proxies_from_sites(self):
         """
         Load all the proxy entries from Sites configured in miniproxypool.config.py to Dababase.
         Only new entry (ip:port) would be imported.
         """
-        logger.info("Loading proxy-entries from configured web-sites...")
+        logger.info("Loading proxy-entries from web-sites...")
         sites = miniproxypool.config.PROXY_SITES
         for site in sites:
             url_base = site['url_base']
@@ -68,7 +102,7 @@ class ProxyPool():
             header = miniproxypool.config.DEFAULT_HEADERS
             header['User-agent'] = ua.random()
             try:
-                r = requests.get(url_base, headers = header, timeout = 5)
+                r = requests.get(url_base, headers=header, timeout=5)
                 cnt_newproxy = 0
                 for match in pattern.findall(r.text):
                     ip = match[ip_ind]
@@ -80,7 +114,7 @@ class ProxyPool():
                 logger.info("  Site [%s]: %d new proxies are added to DB."% (url_base, cnt_newproxy))
             except Exception as e:
                 logger.info(e)
-        logger.info("Loading all done. There're %d proxies in the DB."%len(self._get_all_proxies()))
+        logger.info("Loading websites done. There're %d proxies in the DB."%len(self._get_all_proxies()))
 
 
 

@@ -62,7 +62,7 @@ import miniproxypool
 ```
 ## Config the important parameters
 
-- Threads running policy
+### Threads running policy
 ```python
 miniproxypool.config.VALIDATE_THREAD_RUN_PERIOD = 5 # seconds wait after each validation
 miniproxypool.config.LOAD_FROM_SITES_THREAD_RUN_PERIOD = 3 # seconds wait after each loading from sites
@@ -71,25 +71,27 @@ miniproxypool.config.VALIDATOR_CONNECTIONS_PER_THREAD = 20 # number of proxies t
 
 ```
 
-- Validator Policy  
+### Validator Policy  
 ```python
 miniproxypool.config.VALIDATOR_TIMEOUT = 1 # timeout for each proxy testing
 miniproxypool.config.VALIDATOR_URL = "http://www.google.ca" # url used for each proxy testing
 ```
 
-- Invalid Proxy Policy
+### Invalid Proxy Policy
 ```python
 miniproxypool.config.INVALID_PROXY_TIMES = 5 # if a proxy cannot be connected for VALIDATOR_DEFINE_INVALID_TIMES time, it is defined as invalid
 miniproxypool.config.INVALID_PROXY_IF_DELETE = True # at the end each validation cycle, whether to delete invalid proxy in DB
 ```
 
-- Restful Service  
+### Restful Service  
 ```python
 miniproxypool.config.REST_SRV_IP = "0.0.0.0"
 miniproxypool.config.REST_SRV_PORT = 9876
 ```
 
-- Free proxy sites  
+### Proxy resources
+
+- From websites  
 *note:* the following code fragment is used in the package to extract proxies in the website:
 
 ```python
@@ -129,6 +131,21 @@ miniproxypool.config.PROXY_SITES = [
 ]
 ```
 
+- From local files  
+```python
+miniproxypool.config.PROXY_FILES = [
+    'custom_proxies_list.txt'
+]
+```
+example of proxy file:  
+```python
+# Add proxy list here
+# e.g.
+# 110.110.110.110:1234
+1.2.3.4:123
+5.6.7.8:567
+```
+
 ## Get all active proxies
 ```python
 miniproxypool.get_all_proxies()
@@ -139,3 +156,4 @@ miniproxypool.get_all_proxies()
 - Add http/https protocol mark when loading proxy from sites
 - Add more options in restful api
 - Add aiohttp support for faster validation
+- Add test scripts

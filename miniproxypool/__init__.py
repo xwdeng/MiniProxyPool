@@ -37,7 +37,7 @@ def run_as_daemon():
     global t1, t2
     t1 = threading.Thread(target=proxypool_inst.start_monitor_thread)
     t1.setDaemon(True)
-    t2 = threading.Thread(target=proxypool_inst.start_load_from_sites_thread)
+    t2 = threading.Thread(target=proxypool_inst.start_load_proxies_from_resources_thread)
     t2.setDaemon(True)
 
     t1.start()
