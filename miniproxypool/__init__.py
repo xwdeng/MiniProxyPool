@@ -61,6 +61,6 @@ def get_all_proxies():
     return proxypool_inst.get_valid_proxies()
 
 
-def rest_api_url_get_all_valid_proxiex():
+def rest_api_url_get_all_proxies():
     return "http://" + "localhost:%d/%s" % (miniproxypool.config.REST_SRV_PORT, miniproxypool.config.REST_API_PATH_GET_ALL_VALID)
 

@@ -15,6 +15,5 @@ if __name__ == '__main__':
     while(True):
         time.sleep(5)
         # test and print the valid proxies from restapi
-        r = requests.get(miniproxypool.rest_api_url_get_all_valid_proxiex())
+        r = requests.get(miniproxypool.rest_api_url_get_all_proxies())
         print(r.text)
-

@@ -1,11 +1,11 @@
 # Mini Proxy Pool
-The Mini Proxy Pool is a package to help provide active proxy server resources.
+The Mini Proxy Pool is a package to help provide valid proxy server resources.
 
 # Main Feature
 Here are just a few of the things that Mini Proxy Pool does well:
 
-- Free proxies
-  The main purpose of this project is to provide a simple way to maintain an active proxy pool with high quality proxy server resources. By default, all the proxies are loaded from free websites.
+- Light-weighted
+  The main purpose of this project is to provide a simple way to maintain an active proxy pool with high quality proxy server resources. Proxies sources can be from both websites or files.
 
 - Easy embedded in your own project  
   All the services in this package are running as daemon services. It is easy to setup the proxy into other projects.
@@ -89,7 +89,7 @@ miniproxypool.config.REST_SRV_IP = "0.0.0.0"
 miniproxypool.config.REST_SRV_PORT = 9876
 ```
 
-### Proxy resources
+### Proxy Sources
 
 - From websites  
 *note:* the following code fragment is used in the package to extract proxies in the website:
@@ -109,7 +109,7 @@ for match in pattern.findall(r.text):
 ```
  
 ```python
-miniproxypool.config.PROXY_SITES = [
+miniproxypool.config.PROXY_SOURCE_SITES = [
         {
             'url_base': "https://free-proxy-list.net",
             'pattern': "((?:\d{1,3}\.){1,3}\d{1,3})<\/td><td>(\d{1,6})(.{1,200})<td class='hx'>(.{2,3})",
@@ -133,7 +133,7 @@ miniproxypool.config.PROXY_SITES = [
 
 - From local files  
 ```python
-miniproxypool.config.PROXY_FILES = [
+miniproxypool.config.PROXY_SOURCE_FILES = [
     'custom_proxies_list.txt'
 ]
 ```
@@ -146,10 +146,13 @@ example of proxy file:
 5.6.7.8:567
 ```
 
-## Get all active proxies
+## Get all valid proxies
+### Embedded API
 ```python
 miniproxypool.get_all_proxies()
 ```
+### Rest API
+Rest api address: `miniproxypool.rest_api_url_get_all_proxies()`
 
 # Todo List
 - Add documentations for the source codes

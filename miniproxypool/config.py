@@ -19,14 +19,14 @@ INVALID_PROXY_TIMES = 5 # if a proxy cannot be connected for VALIDATOR_DEFINE_IN
 INVALID_PROXY_IF_DELETE = True
 
 VALIDATE_THREAD_RUN_PERIOD = 5 * 60 # seconds wait after each validation
-LOAD_PORXIES_FROM_RESOURCES_THREAD_RUN_PERIOD = 30 * 60 # seconds wait after each loading from sites
+LOAD_PORXIES_FROM_SOURCES_THREAD_RUN_PERIOD = 30 * 60 # seconds wait after each loading from sites
 
 REST_SRV_IP = "0.0.0.0"
 REST_SRV_PORT = 9876
 REST_API_PATH_GET_ALL_VALID = "/api/v1/proxies/*"
 
 # Free proxy sites
-PROXY_SITES = [
+PROXY_SOURCE_SITES = [
         {
             'url_base': "https://free-proxy-list.net",
             'pattern': "((?:\d{1,3}\.){1,3}\d{1,3})<\/td><td>(\d{1,6})(.{1,200})<td class='hx'>(.{2,3})",
@@ -50,7 +50,7 @@ PROXY_SITES = [
         }
 ]
 
-PROXY_FILES = [
+PROXY_SOURCE_FILES = [
     'custom_proxies_list.txt'
 ]
 

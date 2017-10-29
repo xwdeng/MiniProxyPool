@@ -48,17 +48,17 @@ class ProxyPool():
             time.sleep(miniproxypool.config.VALIDATE_THREAD_RUN_PERIOD)
 
     def start_load_proxies_from_resources_thread(self):
-        logger.info("CONFIG: Reading proxy-list from sites in every %d minutes" % int(miniproxypool.config.LOAD_PORXIES_FROM_RESOURCES_THREAD_RUN_PERIOD / 60))
+        logger.info("CONFIG: Reading proxy-list from sites in every %d minutes" % int(miniproxypool.config.LOAD_PORXIES_FROM_SOURCES_THREAD_RUN_PERIOD / 60))
         while(True):
             self._fetch_proxies_from_sites()
             self._fetch_proxies_from_localfile()
-            time.sleep(miniproxypool.config.LOAD_PORXIES_FROM_RESOURCES_THREAD_RUN_PERIOD)
+            time.sleep(miniproxypool.config.LOAD_PORXIES_FROM_SOURCES_THREAD_RUN_PERIOD)
 
     def _fetch_proxies_from_localfile(self):
         try:
             logger.info("Loading proxy-entries from local files...")
             ## Open the file with read only permit
-            files = miniproxypool.config.PROXY_FILES
+            files = miniproxypool.config.PROXY_SOURCE_FILES
             for fpath in files:
                 if not os.path.exists(fpath):
                     logger.warning("Custom proxy file '%s' does not found." % fpath)
@@ -92,7 +92,7 @@ class ProxyPool():
         Only new entry (ip:port) would be imported.
         """
         logger.info("Loading proxy-entries from web-sites...")
-        sites = miniproxypool.config.PROXY_SITES
+        sites = miniproxypool.config.PROXY_SOURCE_SITES
         for site in sites:
             url_base = site['url_base']
             pattern = re.compile(site['pattern'])

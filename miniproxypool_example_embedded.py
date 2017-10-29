@@ -14,7 +14,7 @@ if __name__ == '__main__':
     miniproxypool.config.VALIDATOR_THREAD_POOL_SIZE = 20
     miniproxypool.config.VALIDATOR_CONNECTIONS_PER_THREAD = 20
     miniproxypool.config.VALIDATE_THREAD_RUN_PERIOD = 5 * 60  # seconds wait after each validation
-    miniproxypool.config.LOAD_PORXIES_FROM_RESOURCES_THREAD_RUN_PERIOD = 10 * 60  # seconds wait after each loading from sites
+    miniproxypool.config.LOAD_PORXIES_FROM_SOURCES_THREAD_RUN_PERIOD = 10 * 60  # seconds wait after each loading from sites
     miniproxypool.run_as_daemon()
 
     while(True):
