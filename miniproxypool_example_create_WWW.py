@@ -76,7 +76,7 @@ if __name__ == '__main__':
         file = open(filepath, "w")
         file.write(create_index_html(miniproxypool.get_all_proxies()))
         file.close()
-        print("%s updated.", filepath)
+        print("File '%s' updated." % filepath)
         time.sleep(60 * 10)
     #print(miniproxypool.get_all_proxies())
 
