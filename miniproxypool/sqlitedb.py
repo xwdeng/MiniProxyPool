@@ -67,12 +67,15 @@ class SqliteDB(object):
             query += ' LIMIT ?'
             vals.append(conds['limit'])
 
-        self.lock.acquire()
         try:
+            self.lock.acquire()
             data = self.cursor.execute(query, vals).fetchall()
+        except Exception as e:
+            data = []
         finally:
             self.lock.release()
-            return data
+
+        return data
 
     def insert(self, table_name, args):
         """

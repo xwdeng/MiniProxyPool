@@ -181,4 +181,3 @@ class ProxyPool():
         self.db.delete_invalid_proxies()
 
 
-proxypool_inst = ProxyPool()
