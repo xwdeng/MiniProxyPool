@@ -2,8 +2,9 @@ import miniproxypool
 import logging
 import sys
 import time
-logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='[%(name)20.20s] [%(asctime)s] [%(levelname)7.7s] [%(threadName)10s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S',)
 import requests
+logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='[%(name)20.20s] [%(asctime)s] [%(levelname)7.7s] [%(threadName)10s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S',)
+
 
 if __name__ == '__main__':
     miniproxypool.config.REST_SRV_IP = "0.0.0.0"

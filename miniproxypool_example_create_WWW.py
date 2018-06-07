@@ -40,7 +40,7 @@ def create_index_html(proxies_list):
   </thead>
   <tbody>
     """
-    cnt = 1;
+    cnt = 1
     for proxy in proxies_list:
         html += "<tr>\n";
         html +="<th scope=\"row\">%d</th>\n"%cnt
@@ -48,7 +48,7 @@ def create_index_html(proxies_list):
         html +="<td>%s</td>\n"%proxy[1]
         html +="<td>%.3f</td>\n"%proxy[2]
         html +="</tr>\n"
-        cnt += 1;
+        cnt += 1
 
     html += """
     </tbody>

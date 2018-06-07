@@ -160,3 +160,4 @@ Rest api address: `miniproxypool.rest_api_url_get_all_proxies()`
 - Add more options in restful api
 - Add aiohttp support for faster validation
 - Add test scripts
+- Remove requests, to make it a MINIMUM package
