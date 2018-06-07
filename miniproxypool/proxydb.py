@@ -32,7 +32,8 @@ class ProxyDB(SqliteDB):
                    PRIMARY KEY (ip,port)
                '''
         query = "CREATE TABLE IF NOT EXISTS %s(%s)" % (self.table_name, values)
-        self.cursor.execute(query)
+        self.executesql(query)
+
         query = '''
                    CREATE INDEX IF NOT EXISTS proxy_index on %s (protocol, speed, updated_time, created_time);
                    CREATE TRIGGER IF NOT EXISTS proxy_update_trig AFTER UPDATE OF speed ON %s
@@ -44,7 +45,7 @@ class ProxyDB(SqliteDB):
                          UPDATE %s SET created_time=datetime(\'now\',\'localtime\') WHERE ip=NEW.ip and port=NEW.port;
                        END;
                '''%( self.table_name, self.table_name, self.table_name, self.table_name, self.table_name)
-        self.cursor.executescript(query)
+        self.executescript(query)
         logger.debug("Created table %s." % self.table_name)
 
 

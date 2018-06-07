@@ -19,12 +19,14 @@ import miniproxypool.config
 logger = logging.getLogger(__name__)
 proxypool_inst = None
 
+
 def proxy_entry_to_dict(proxy_entry):
-    dict = {}
-    dict["ip"] = proxy_entry[0]
-    dict["port"] = proxy_entry[1]
-    dict["speed"] = proxy_entry[2]
-    return dict
+    proxy_dict = {
+        'ip': proxy_entry[0],
+        'port': proxy_entry[1],
+        'speed': proxy_entry[2]
+    }
+    return proxy_dict
 
 
 class HTTPRequestHandler(BaseHTTPRequestHandler):
@@ -53,30 +55,30 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
         HTTPServer.shutdown(self)
 
 
-class SimpleHttpServer():
+class SimpleHttpServer:
     def __init__(self, ip, port):
         self.server = ThreadedHTTPServer((ip, port), HTTPRequestHandler)
-
+        self.server_thread = threading.Thread(target=self.server.serve_forever)
 
     def start(self):
-        self.server_thread = threading.Thread(target=self.server.serve_forever)
+
         self.server_thread.daemon = True
         self.server_thread.start()
 
-    def waitForThread(self):
+    def wait_for_thread(self):
         self.server_thread.join()
 
     def stop(self):
         self.server.shutdown()
-        self.waitForThread()
+        self.wait_for_thread()
 
 
 def start_rest_api_thread(proxypool):
     global proxypool_inst
     proxypool_inst = proxypool
     server = SimpleHttpServer(miniproxypool.config.REST_SRV_IP, miniproxypool.config.REST_SRV_PORT)
-    logger.warning('Restful API Server running at [%s:%d] ...'%(miniproxypool.config.REST_SRV_IP, miniproxypool.config.REST_SRV_PORT))
+    logger.warning('Restful API Server running at [%s:%d] ...' % (miniproxypool.config.REST_SRV_IP, miniproxypool.config.REST_SRV_PORT))
     logging.warning("Restapi to get all valid proxies: GET http://%s:%d/api/v1/proxies" % ("localhost", miniproxypool.config.REST_SRV_PORT))
 
     server.start()
-    server.waitForThread()
+    server.wait_for_thread()
