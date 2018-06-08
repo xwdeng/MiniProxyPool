@@ -1,4 +1,8 @@
-# Mini Proxy Pool
+Mini Proxy Pool
+=================
+
+[![Build Status](https://travis-ci.org/xwdeng/MiniProxyPool.svg?branch=master)](https://travis-ci.org/xwdeng/MiniProxyPool)
+
 The Mini Proxy Pool is a package to help provide valid proxy server resources.
 
 # Main Feature
