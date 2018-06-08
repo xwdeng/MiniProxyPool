@@ -1,4 +1,5 @@
 import unittest
+
 from miniproxypool import proxydb
 from multiprocessing.pool import ThreadPool
 import time
